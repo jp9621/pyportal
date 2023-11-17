@@ -1,6 +1,13 @@
 import requests
 import json
+import time
 from tkinter import *
+
+# Defining the Window
+root = Tk()
+root.title("JAPAFX")
+root.configure(bg='#36393E')
+targets = [];
 
 def write_callback(response, data):
     response += data
@@ -62,20 +69,59 @@ def csv(currency_pair, session, biastf, entrytf, conftf, conftype, maxrr, setupt
     except Exception as e:
         print("Unable to open the CSV file:", str(e))
 
+def targetAdd(target):
+    targets.append(target);
 
-from tkinter import *
+def orderButton(targets):
+    pair = pairInput.get()
+    stop = stopInput.get()
 
-# Defining the Window
-root = Tk()
-root.title("JAPAFX")
-root.configure(bg='#36393E')
+    tpList = targets
+    initialPrice = price(pair)
+
+    tpList = targets
+    initialPrice = price(pair)
+
+    pairtrackLabel = Label(root, text="PAIR: ", fg=fg, bg=bg, font=font, padx=padx, pady=pady)
+    stoptrackLabel = Label(root, text="STOPLOSS: ", fg=fg, bg=bg, font=font, padx=padx, pady=pady)
+    tptrackLabel = Label(root, text="RUNNERS: ", fg=fg, bg=bg, font=font, padx=padx, pady=pady)
+
+    pairtrackLabel.grid(row=4, column=0)
+    stoptrackLabel.grid(row=5, column=0)
+    tptrackLabel.grid(row=6, column=0)
+        
+
+    while True:
+      
+        tpOutput = "NOT MET";
+        stopOutput = "NOT MET"
+        while True:
+            currentPrice = price(pair)
+            targetsMet = track(pair, tpList, stop, initialPrice)
+            for i in range(len(targetsMet)):
+                if (targetsMet[i]):
+                    tpOutput = "MET"
+            if ((initialPrice > stop and currentPrice < stop) or (initialPrice < stop and currentPrice > stop)):
+                stopOutput = "MET"
+                break
+            pairOutputLabel = Label(root, text=pair, fg=fg, bg=bg, font=font, padx=padx, pady=pady)
+            stopOutputLabel = Label(root, text=stopOutput, fg=fg, bg=bg, font=font, padx=padx, pady=pady)
+            tpOutputLabel = Label(root, text=tpOutput, fg=fg, bg=bg, font=font, padx=padx, pady=pady)
+            pairOutputLabel.grid(row=4, column=1)
+            stopOutputLabel.grid(row=5, column=1)
+            tpOutputLabel.grid(row=6, column=1)
+            time.sleep(15)
+        
+
+
+
 
 # Creating some default appearance related settings for window elements
 padx = 5
 pady = 5
 bg = '#4A4D52'
-bgi = '#8ADBC8'
-fg = '#9EF8AE'
+bgi = '#F4C73F'
+fg = '#E1F174'
 font = ('Arial', 14)
 lightblack = '#5D636C'
 gray = '#DBE5E3'
@@ -87,47 +133,25 @@ tpLabel = Label(root, text="TP1: ", fg=fg, bg=bg, font=font, padx=padx, pady=pad
 
 
 # Defining Input
-virionInput = Entry(root, bg=gray, font=font, highlightbackground=bgi, highlightthickness=3)
-bmiInput = Entry(root, bg=gray, font=font, highlightbackground=bgi, highlightthickness=3)
-bmiInput.insert(0, "kg")
-ageInput = Entry(root, bg=gray, font=font, highlightbackground=bgi, highlightthickness=3)
-ageInput.insert(0, "0-24 Months")
-genderInput = Entry(root, bg=gray, font=font, highlightbackground=bgi, highlightthickness=3)
-genderInput.insert(0, "Male or Female")
-symptomOnsetInput = Entry(root, bg=gray, font=font, highlightbackground=bgi, highlightthickness=3)
-symptomOnsetInput.insert(0, "Old or Recent")
+pairInput = Entry(root, bg=gray, font=font, highlightbackground=bgi, highlightthickness=3)
+stopInput = Entry(root, bg=gray, font=font, highlightbackground=bgi, highlightthickness=3)
+tpInput = Entry(root, bg=gray, font=font, highlightbackground=bgi, highlightthickness=3)
+tpOrderButton = Button(root, text="+", command=targetAdd(tpInput.get()))
+
 
 # Gridding Widgets
-virionLabel.grid(row=0, column=0)
-virionInput.grid(row=0, column=1)
-bmiLabel.grid(row=1, column=0)
-bmiInput.grid(row=1, column=1)
-ageLabel.grid(row=2, column=0)
-ageInput.grid(row=2, column=1)
-genderLabel.grid(row=3, column=0)
-genderInput.grid(row=3, column=1)
-symptomOnsetLabel.grid(row=4, column=0)
-symptomOnsetInput.grid(row=4, column=1)
+pairLabel.grid(row=0, column=0)
+pairInput.grid(row=0, column=1)
+stopLabel.grid(row=1, column=0)
+stopInput.grid(row=1, column=1)
+tpLabel.grid(row=2, column=0)
+tpInput.grid(row=2, column=1)
+tpOrderButton.grid(row=2, column=3)
 
-# Declaring and gridding all the output labels necessary
-    infectabilityLabel = Label(root, text="Infectability: ", fg=fg, bg=bg, font=font, padx=padx, pady=pady)
-    durationLabel = Label(root, text="Duration: ", fg=fg, bg=bg, font=font, padx=padx, pady=pady)
-    infectabilityOutput = Label(root, text= infectabilityReport, fg=fg, bg=bg, font=font, padx=padx, pady=pady)
-    durationOutput = Label(root, text= durationReport, fg=fg, bg=bg, font=font, padx=padx, pady=pady)
-    infectabilityLabel.grid(row=6, column=0)
-    durationLabel.grid(row=7, column=0)
-    infectabilityOutput.grid(row=6, column=1)
-    durationOutput.grid(row=7, column=1)
 
 # Declaring and Gridding Calculate Button
-calculateButton = Button(root, text="Calculate", command=calculate, fg=fg, bg=bg,font=font)
-calculateButton.grid(row=5, column=0)
-
-
-
-
-
-# have to change all labels to tp1 tp2 and also make a new method for creating new labels 
+orderButton = Button(root, text="Order", command=orderButton(targets), fg=fg, bg=bg,font=font)
+orderButton.grid(row=3, column=0)
 
 root.mainloop() 
 
