@@ -2,6 +2,10 @@ import requests
 import json
 import time
 from tkinter import *
+import pandas as pd
+import oandapyV20
+from oandapyV20 import API
+import oandapyV20.endpoints.pricing as pricing
 
 # Defining the Window
 root = Tk()
@@ -9,35 +13,24 @@ root.title("JAPAFX")
 root.configure(bg='#36393E')
 targets = [];
 
-def write_callback(response, data):
-    response += data
-    return response
+def price(pair):
 
-def price(currency_pair):
-    url = f"https://api-fxpractice.oanda.com/v3/accounts/101-001-26231816-001/pricing?instruments={currency_pair}"
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer f18a87ad84976c1010503042a9621689-8ff03716635ad7204a2c83b52cea3d36"
+    accountID = "101-001-26231816-001"
+    access_token = "e498e28946731fbce23b09fc3bd50d09-cea6d8762bafefb600198e685cad980b"
+    api = API(access_token=access_token)
+
+    params = {
+        "instruments": pair
     }
 
-    try:
-        response = ""
-        response = requests.get(url, headers=headers)
-        response.raise_for_status()  # Raise an exception for non-2xx responses
+    r = pricing.PricingInfo(accountID=accountID, params=params)
+    rv = api.request(r)
 
-        # Parse the JSON response
-        json_response = response.json()
+    # Extracting the price from the response
+    price = rv['prices'][0]['bids'][0]['price'] 
+    return price
 
-        # Output the price of the instrument
-        for instrument in json_response["prices"]:
-            price = instrument["asks"][0]["price"]
-            return float(price)
-
-    except requests.exceptions.RequestException as e:
-        print(f"Failed to perform connection: {e}")
-
-    return 0.0
-
+    
 def track(currency_name, targets, stoploss, initial_price):
     # Get the price for the currency pair using price() function
     current_price = price(currency_name)
@@ -58,26 +51,14 @@ def track(currency_name, targets, stoploss, initial_price):
     # Return the list of targets met
     return targets_met
 
-def csv(currency_pair, session, biastf, entrytf, conftf, conftype, maxrr, setuptype, be, TP1, TP2, rs, comments):
-    csvcontent = f'"{currency_pair}","{session}","{biastf}","{entrytf}","{conftf}","{conftype}",' \
-                 f'"{maxrr}","{setuptype}","{be}","{TP1}","{TP2}","{rs}","{comments}"\n'
 
-    try:
-        with open("log.csv", "a") as outputFile:
-            outputFile.write(csvcontent)
-        print("CSV data appended successfully.")
-    except Exception as e:
-        print("Unable to open the CSV file:", str(e))
 
 def targetAdd(target):
-    targets.append(target);
+    targets.append(float(target));
 
 def orderButton(targets):
     pair = pairInput.get()
     stop = stopInput.get()
-
-    tpList = targets
-    initialPrice = price(pair)
 
     tpList = targets
     initialPrice = price(pair)
@@ -93,8 +74,8 @@ def orderButton(targets):
 
     while True:
       
-        tpOutput = "NOT MET";
-        stopOutput = "NOT MET"
+        tpTrackOutput = "NOT MET";
+        stopTrackOutput = "NOT MET"
         while True:
             currentPrice = price(pair)
             targetsMet = track(pair, tpList, stop, initialPrice)
@@ -104,7 +85,7 @@ def orderButton(targets):
             if ((initialPrice > stop and currentPrice < stop) or (initialPrice < stop and currentPrice > stop)):
                 stopOutput = "MET"
                 break
-            pairOutputLabel = Label(root, text=pair, fg=fg, bg=bg, font=font, padx=padx, pady=pady)
+            pairOutputLabel = Label(root, text=currentPrice, fg=fg, bg=bg, font=font, padx=padx, pady=pady)
             stopOutputLabel = Label(root, text=stopOutput, fg=fg, bg=bg, font=font, padx=padx, pady=pady)
             tpOutputLabel = Label(root, text=tpOutput, fg=fg, bg=bg, font=font, padx=padx, pady=pady)
             pairOutputLabel.grid(row=4, column=1)
@@ -136,8 +117,7 @@ tpLabel = Label(root, text="TP1: ", fg=fg, bg=bg, font=font, padx=padx, pady=pad
 pairInput = Entry(root, bg=gray, font=font, highlightbackground=bgi, highlightthickness=3)
 stopInput = Entry(root, bg=gray, font=font, highlightbackground=bgi, highlightthickness=3)
 tpInput = Entry(root, bg=gray, font=font, highlightbackground=bgi, highlightthickness=3)
-tpOrderButton = Button(root, text="+", command=targetAdd(tpInput.get()))
-
+tpOrderButton = Button(root, text="+", command=lambda: targetAdd(tpInput.get()))
 
 # Gridding Widgets
 pairLabel.grid(row=0, column=0)
@@ -150,9 +130,20 @@ tpOrderButton.grid(row=2, column=3)
 
 
 # Declaring and Gridding Calculate Button
-orderButton = Button(root, text="Order", command=orderButton(targets), fg=fg, bg=bg,font=font)
+orderButton = Button(root, text="Order", command=lambda: orderButton(targets), fg=fg, bg=bg, font=font)
 orderButton.grid(row=3, column=0)
 
 root.mainloop() 
 
 
+
+def csv(currency_pair, session, biastf, entrytf, conftf, conftype, maxrr, setuptype, be, TP1, TP2, rs, comments):
+    csvcontent = f'"{currency_pair}","{session}","{biastf}","{entrytf}","{conftf}","{conftype}",' \
+                 f'"{maxrr}","{setuptype}","{be}","{TP1}","{TP2}","{rs}","{comments}"\n'
+
+    try:
+        with open("log.csv", "a") as outputFile:
+            outputFile.write(csvcontent)
+        print("CSV data appended successfully.")
+    except Exception as e:
+        print("Unable to open the CSV file:", str(e))
