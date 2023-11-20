@@ -30,6 +30,18 @@ def price(pair):
     price = rv['prices'][0]['bids'][0]['price'] 
     return price
 
+def csv(currency_pair, session, biastf, entrytf, conftf, conftype, maxrr, setuptype, be, TP1, TP2, rs, comments):
+    csvcontent = f'"{currency_pair}","{session}","{biastf}","{entrytf}","{conftf}","{conftype}",' \
+                 f'"{maxrr}","{setuptype}","{be}","{TP1}","{TP2}","{rs}","{comments}"\n'
+
+    try:
+        with open("log.csv", "a") as outputFile:
+            outputFile.write(csvcontent)
+        print("CSV data appended successfully.")
+    except Exception as e:
+        print("Unable to open the CSV file:", str(e))
+
+
     
 def track(currency_name, targets, stoploss, initial_price):
     # Get the price for the currency pair using price() function
@@ -51,16 +63,13 @@ def track(currency_name, targets, stoploss, initial_price):
     # Return the list of targets met
     return targets_met
 
-
-
 def targetAdd(target):
     targets.append(float(target));
 
-def orderButton():
+def order():
     pair = pairInput.get()
     stop = stopInput.get()
 
-    tpList = targets
     initialPrice = price(pair)
 
     pairtrackLabel = Label(root, text="PAIR: ", fg=fg, bg=bg, font=font, padx=padx, pady=pady)
@@ -70,29 +79,26 @@ def orderButton():
     pairtrackLabel.grid(row=4, column=0)
     stoptrackLabel.grid(row=5, column=0)
     tptrackLabel.grid(row=6, column=0)
-        
-
-    while True:
       
-        tpTrackOutput = "NOT MET";
-        stopTrackOutput = "NOT MET"
-        while True:
-            currentPrice = price(pair)
-            targetsMet = track(pair, tpList, stop, initialPrice)
-            for i in range(len(targetsMet)):
-                if (targetsMet[i]):
-                    tpOutput = "MET"
-            if ((initialPrice > stop and currentPrice < stop) or (initialPrice < stop and currentPrice > stop)):
-                stopOutput = "MET"
-                break
-            pairOutputLabel = Label(root, text=currentPrice, fg=fg, bg=bg, font=font, padx=padx, pady=pady)
-            stopOutputLabel = Label(root, text=stopOutput, fg=fg, bg=bg, font=font, padx=padx, pady=pady)
-            tpOutputLabel = Label(root, text=tpOutput, fg=fg, bg=bg, font=font, padx=padx, pady=pady)
-            pairOutputLabel.grid(row=4, column=1)
-            stopOutputLabel.grid(row=5, column=1)
-            tpOutputLabel.grid(row=6, column=1)
-            time.sleep(15)
-        
+    tpOutput = "NOT MET";
+    stopOutput = "NOT MET"
+    while True:
+        currentPrice = price(pair)
+        targetsMet = track(pair, targets, stop, initialPrice)
+        for i in range(len(targetsMet)):
+            if (targetsMet[i]):
+                tpOutput = "MET"
+        if ((initialPrice > stop and currentPrice < stop) or (initialPrice < stop and currentPrice > stop)):
+            stopOutput = "MET"
+            break
+        pairOutputLabel = Label(root, text=currentPrice, fg=fg, bg=bg, font=font, padx=padx, pady=pady)
+        stopOutputLabel = Label(root, text=stopOutput, fg=fg, bg=bg, font=font, padx=padx, pady=pady)
+        tpOutputLabel = Label(root, text=tpOutput, fg=fg, bg=bg, font=font, padx=padx, pady=pady)
+        pairOutputLabel.grid(row=4, column=1)
+        stopOutputLabel.grid(row=5, column=1)
+        tpOutputLabel.grid(row=6, column=1)
+        time.sleep(15)
+    
 
 
 
@@ -118,6 +124,7 @@ pairInput = Entry(root, bg=gray, font=font, highlightbackground=bgi, highlightth
 stopInput = Entry(root, bg=gray, font=font, highlightbackground=bgi, highlightthickness=3)
 tpInput = Entry(root, bg=gray, font=font, highlightbackground=bgi, highlightthickness=3)
 tpOrderButton = Button(root, text="+", command=lambda: targetAdd(tpInput.get()))
+orderButton = Button(root, text="Order", command=lambda: order())
 
 # Gridding Widgets
 pairLabel.grid(row=0, column=0)
@@ -127,23 +134,9 @@ stopInput.grid(row=1, column=1)
 tpLabel.grid(row=2, column=0)
 tpInput.grid(row=2, column=1)
 tpOrderButton.grid(row=2, column=3)
-
-
-# Declaring and Gridding Calculate Button
-orderButton = Button(root, text="Order", command=lambda: orderButton, fg=fg, bg=bg, font=font)
 orderButton.grid(row=3, column=0)
 
 root.mainloop() 
 
 
 
-def csv(currency_pair, session, biastf, entrytf, conftf, conftype, maxrr, setuptype, be, TP1, TP2, rs, comments):
-    csvcontent = f'"{currency_pair}","{session}","{biastf}","{entrytf}","{conftf}","{conftype}",' \
-                 f'"{maxrr}","{setuptype}","{be}","{TP1}","{TP2}","{rs}","{comments}"\n'
-
-    try:
-        with open("log.csv", "a") as outputFile:
-            outputFile.write(csvcontent)
-        print("CSV data appended successfully.")
-    except Exception as e:
-        print("Unable to open the CSV file:", str(e))
