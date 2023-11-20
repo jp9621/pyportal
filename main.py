@@ -9,7 +9,7 @@ import oandapyV20.endpoints.pricing as pricing
 
 # Defining the Window
 root = Tk()
-root.title("JAPAFX")
+root.title("")
 root.configure(bg='#36393E')
 targets = [];
 
@@ -56,7 +56,7 @@ def track(currency_name, targets, stoploss, initial_price):
 def targetAdd(target):
     targets.append(float(target));
 
-def orderButton(targets):
+def orderButton():
     pair = pairInput.get()
     stop = stopInput.get()
 
@@ -130,7 +130,7 @@ tpOrderButton.grid(row=2, column=3)
 
 
 # Declaring and Gridding Calculate Button
-orderButton = Button(root, text="Order", command=lambda: orderButton(targets), fg=fg, bg=bg, font=font)
+orderButton = Button(root, text="Order", command=lambda: orderButton, fg=fg, bg=bg, font=font)
 orderButton.grid(row=3, column=0)
 
 root.mainloop() 
