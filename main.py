@@ -51,17 +51,11 @@ def track(currency_name, targets, stoploss, initial_price):
 
     # Check if targets are met
     for i in range(len(targets)):
-        if ((current_price >= targets[i] and stoploss < current_price) or
-           (current_price <= targets[i] and stoploss > current_price)):
+        if (current_price >= targets[i] and stoploss < current_price) or (current_price <= targets[i] and stoploss > current_price):
             targets_met[i] = True
-            print(f"Target {targets[i]} met")
 
-        if ((current_price < stoploss and stoploss < initial_price) or
-           (current_price > stoploss and stoploss > initial_price)):
-            print("Stopped Out")
-
-    # Return the list of targets met
     return targets_met
+
 
 def targetAdd(target):
     targets.append(float(target));
@@ -69,35 +63,56 @@ def targetAdd(target):
 def order():
     pair = pairInput.get()
     stop = stopInput.get()
-
+    targets.append(tpInput.get())
     initialPrice = price(pair)
 
     pairtrackLabel = Label(root, text="PAIR: ", fg=fg, bg=bg, font=font, padx=padx, pady=pady)
     stoptrackLabel = Label(root, text="STOPLOSS: ", fg=fg, bg=bg, font=font, padx=padx, pady=pady)
     tptrackLabel = Label(root, text="RUNNERS: ", fg=fg, bg=bg, font=font, padx=padx, pady=pady)
-
     pairtrackLabel.grid(row=4, column=0)
     stoptrackLabel.grid(row=5, column=0)
     tptrackLabel.grid(row=6, column=0)
-      
-    tpOutput = "NOT MET";
-    stopOutput = "NOT MET"
-    while True:
+
+    pairInput.configure(state='readonly')
+    stopInput.configure(state='readonly')
+    tpInput.configure(state='readonly')
+    orderButton.config(state='disabled')
+
+    def track_and_update_labels():
+        tpOutput = "NOT MET";
+        stopOutput = "NOT MET"
         currentPrice = price(pair)
         targetsMet = track(pair, targets, stop, initialPrice)
+        stop_loop = False
+
         for i in range(len(targetsMet)):
-            if (targetsMet[i]):
+            if targetsMet[i]:
                 tpOutput = "MET"
-        if ((initialPrice > stop and currentPrice < stop) or (initialPrice < stop and currentPrice > stop)):
+                stop_loop = True
+                break
+
+        if (initialPrice > stop and currentPrice < stop) or (initialPrice < stop and currentPrice > stop):
             stopOutput = "MET"
-            break
-        pairOutputLabel = Label(root, text=currentPrice, fg=fg, bg=bg, font=font, padx=padx, pady=pady)
-        stopOutputLabel = Label(root, text=stopOutput, fg=fg, bg=bg, font=font, padx=padx, pady=pady)
-        tpOutputLabel = Label(root, text=tpOutput, fg=fg, bg=bg, font=font, padx=padx, pady=pady)
-        pairOutputLabel.grid(row=4, column=1)
-        stopOutputLabel.grid(row=5, column=1)
-        tpOutputLabel.grid(row=6, column=1)
-        time.sleep(15)
+            stop_loop = True
+
+        pairOutputLabel.config(text=currentPrice)
+        stopOutputLabel.config(text=stopOutput)
+        tpOutputLabel.config(text=tpOutput)
+        if (not stop_loop):
+            root.after(1000, track_and_update_labels)  # Schedule the function to be called again after 15 seconds
+
+        
+
+    # Initialize labels
+    pairOutputLabel = Label(root, text="", fg=fg, bg=bg, font=font, padx=padx, pady=pady)
+    stopOutputLabel = Label(root, text="", fg=fg, bg=bg, font=font, padx=padx, pady=pady)
+    tpOutputLabel = Label(root, text="", fg=fg, bg=bg, font=font, padx=padx, pady=pady)
+    pairOutputLabel.grid(row=4, column=1)
+    stopOutputLabel.grid(row=5, column=1)
+    tpOutputLabel.grid(row=6, column=1)
+
+    # Start the update loop
+    track_and_update_labels()
     
 
 
