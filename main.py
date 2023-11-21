@@ -12,6 +12,9 @@ root = Tk()
 root.title("")
 root.configure(bg='#36393E')
 targets = [];
+targetsMet = [];
+global maxrr
+maxrr = 0.0
 
 def price(pair):
 
@@ -30,6 +33,108 @@ def price(pair):
     price = rv['prices'][0]['bids'][0]['price'] 
     return price
 
+def log(pair, maxrr):
+    pairLabel2 = Label(root, text="Pair: ", fg=fg, bg=bg, font=font, padx=padx, pady=pady)
+    sessionLabel = Label(root, text="Session: ", fg=fg, bg=bg, font=font, padx=padx, pady=pady)
+    biastfLabel = Label(root, text="Bias TF: ", fg=fg, bg=bg, font=font, padx=padx, pady=pady)
+    entrytfLabel = Label(root, text="Entry TF: ", fg=fg, bg=bg, font=font, padx=padx, pady=pady)
+    conftfLabel = Label(root, text="Confirmation TF: ", fg=fg, bg=bg, font=font, padx=padx, pady=pady)
+    conftypeLabel = Label(root, text="Confirmation Type: ", fg=fg, bg=bg, font=font, padx=padx, pady=pady)
+    maxrrLabel = Label(root, text="Max RR: ", fg=fg, bg=bg, font=font, padx=padx, pady=pady)
+    setuptypeLabel = Label(root, text="Setup Type: ", fg=fg, bg=bg, font=font, padx=padx, pady=pady)
+    breakevenLabel = Label(root, text="Breakeven: ", fg=fg, bg=bg, font=font, padx=padx, pady=pady)
+    TP1Label = Label(root, text="Target 1: ", fg=fg, bg=bg, font=font, padx=padx, pady=pady)
+    TP2Label = Label(root, text="Target 2: ", fg=fg, bg=bg, font=font, padx=padx, pady=pady)
+    runnersLabel = Label(root, text="Runners: ", fg=fg, bg=bg, font=font, padx=padx, pady=pady)
+    commentLabel = Label(root, text="Comments: ", fg=fg, bg=bg, font=font, padx=padx, pady=pady)
+    
+
+
+    if (targetsMet[1]):
+        be = True
+    
+    if (targetsMet[2]):
+        tp1 = True
+    elif (targetsMet[2] == None):
+        tp1 = False
+    else:
+        tp1 = False
+    
+    if (targetsMet[3]):
+        tp2 = True
+    elif (targetsMet[3] == None):
+        tp2 = False
+    else:
+        tp2 = False
+
+    if (targetsMet[4]):
+        rs = True
+    elif (targetsMet[4] == None):
+        rs = False
+    else:
+        rs = False
+
+    pairOutput = Label(root, text=pair, fg=fg, bg=bg, font=font, padx=padx, pady=pady)
+
+    sessionInput = Entry(root, bg=gray, font=font, highlightbackground=bgi, highlightthickness=3)
+    biastfInput = Entry(root, bg=gray, font=font, highlightbackground=bgi, highlightthickness=3)
+    entrytfInput = Entry(root, bg=gray, font=font, highlightbackground=bgi, highlightthickness=3)
+    conftfInput = Entry(root, bg=gray, font=font, highlightbackground=bgi, highlightthickness=3)
+    conftypeInput = Entry(root, bg=gray, font=font, highlightbackground=bgi, highlightthickness=3)
+
+    maxxrrOutput = Label(root, text=maxrr, fg=fg, bg=bg, font=font, padx=padx, pady=pady)
+
+    setuptypeInput = Entry(root, bg=gray, font=font, highlightbackground=bgi, highlightthickness=3)
+
+    breakevenOutput = Label(root, text=be, fg=fg, bg=bg, font=font, padx=padx, pady=pady)
+    TP1Output = Label(root, text=tp1, fg=fg, bg=bg, font=font, padx=padx, pady=pady)
+    TP2Output = Label(root, text=tp2, fg=fg, bg=bg, font=font, padx=padx, pady=pady)
+    runnersOutput = Label(root, text=rs, fg=fg, bg=bg, font=font, padx=padx, pady=pady)
+
+    commentInput = Entry(root, bg=gray, font=font, highlightbackground=bgi, highlightthickness=3)
+    createFileButton = Button(root, text="Create File", command=lambda: createFile())
+
+    pairLabel2.grid(row=8, column=0)
+    sessionLabel.grid(row=9, column=0)
+    biastfLabel.grid(row=10, column=0)
+    entrytfLabel.grid(row=11, column=0)
+    conftfLabel.grid(row=12, column=0)
+    conftypeLabel.grid(row=13, column=0)
+    maxrrLabel.grid(row=14, column=0)
+    setuptypeLabel.grid(row=15, column=0)
+    breakevenLabel.grid(row=16, column=0)
+    TP1Label.grid(row=17, column=0)
+    TP2Label.grid(row=18, column=0)
+    runnersLabel.grid(row=19, column=0)
+    commentLabel.grid(row=20, column=0)
+    createFileButton.grid(row=21, column=0)
+
+    pairOutput.grid(row=8, column=1)
+    sessionInput.grid(row=9, column=1)
+    biastfInput.grid(row=10, column=1)
+    entrytfInput.grid(row=11, column=1)
+    conftfInput.grid(row=12, column=1)
+    conftypeInput.grid(row=13, column=1)
+    maxxrrOutput.grid(row=14, column=1)
+    setuptypeInput.grid(row=15, column=1)
+    breakevenOutput.grid(row=16, column=1)
+    TP1Output.grid(row=17, column=1)
+    TP2Output.grid(row=18, column=1)
+    runnersOutput.grid(row=19, column=1)
+    commentInput.grid(row=20, column=1)
+    
+
+    def createFile():
+        csv(pair, sessionInput.get(), biastfInput.get(), entrytfInput.get(), conftfInput.get(), conftypeInput.get(), maxrr, setuptypeInput.get(), be, tp1, tp2, rs, commentInput.get())
+        fileStatusUpdate = Label(root, text="File Created", fg=fg, bg=bg, font=font, padx=padx, pady=pady)
+        fileStatusUpdate.grid(row=21, column=1)
+
+
+
+
+
+
+
 def csv(currency_pair, session, biastf, entrytf, conftf, conftype, maxrr, setuptype, be, TP1, TP2, rs, comments):
     csvcontent = f'"{currency_pair}","{session}","{biastf}","{entrytf}","{conftf}","{conftype}",' \
                  f'"{maxrr}","{setuptype}","{be}","{TP1}","{TP2}","{rs}","{comments}"\n'
@@ -45,7 +150,7 @@ def csv(currency_pair, session, biastf, entrytf, conftf, conftype, maxrr, setupt
     
 def track(currency_name, targets, stoploss, initial_price):
     # Get the price for the currency pair using price() function
-    current_price = price(currency_name)
+    current_price = float(price(currency_name))
 
     targets_met = [False] * len(targets)
 
@@ -62,9 +167,9 @@ def targetAdd(target):
 
 def order():
     pair = pairInput.get()
-    stop = stopInput.get()
-    targets.append(tpInput.get())
-    initialPrice = price(pair)
+    stop = float(stopInput.get())
+    targets.append(float(tpInput.get()))
+    initialPrice = float(price(pair))
 
     pairtrackLabel = Label(root, text="PAIR: ", fg=fg, bg=bg, font=font, padx=padx, pady=pady)
     stoptrackLabel = Label(root, text="STOPLOSS: ", fg=fg, bg=bg, font=font, padx=padx, pady=pady)
@@ -79,11 +184,16 @@ def order():
     orderButton.config(state='disabled')
 
     def track_and_update_labels():
+        global maxrr
         tpOutput = "NOT MET";
         stopOutput = "NOT MET"
-        currentPrice = price(pair)
+        currentPrice = float(price(pair))
         targetsMet = track(pair, targets, stop, initialPrice)
         stop_loop = False
+
+        newmaxrr = (currentPrice - initialPrice)/(initialPrice - stop)
+        if (newmaxrr > maxrr):
+            maxrr = newmaxrr
 
         for i in range(len(targetsMet)):
             if targetsMet[i]:
@@ -100,7 +210,10 @@ def order():
         tpOutputLabel.config(text=tpOutput)
         if (not stop_loop):
             root.after(1000, track_and_update_labels)  # Schedule the function to be called again after 15 seconds
-
+        else:
+            logButton = Button(root, text="Log", command=lambda: log())
+            logButton.grid(row=7, column=0)
+        
         
 
     # Initialize labels
