@@ -9,7 +9,7 @@ import oandapyV20.endpoints.pricing as pricing
 
 # Defining the Window
 root = Tk()
-root.title("JAPA Portal")
+root.title("Portal")
 root.configure(bg='#36393E')
 targets = [];
 targetsMet = [];
